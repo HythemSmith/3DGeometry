@@ -32,6 +32,7 @@ int main()
 	// So that means we only have the modern functions
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_DEPTH_BITS, 24); // Request a 24-bit depth buffer
 
 	// Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
 	GLFWwindow* window = glfwCreateWindow(width, height, "YoutubeOpenGL", NULL, NULL);
@@ -52,7 +53,7 @@ int main()
 	glViewport(0, 0, width, height);
 
 	Object object;
-	object.setObject("cube");
+	object.setObject("solid sphere");
 	vector<GLfloat> vertices = object.getVertices();
 	vector<GLuint> indices = object.getIndices();
 	// Generates Shader object using shaders default.vert and default.frag
@@ -112,7 +113,7 @@ int main()
 		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();
 		// Draw primitives, number of indices, datatype of indices, index of indices
-		glDrawElements(GL_LINE_STRIP, indices.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events

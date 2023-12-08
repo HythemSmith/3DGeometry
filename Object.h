@@ -6,8 +6,9 @@
 #include<glm/gtc/matrix_transform.hpp>
 #include<glm/gtc/type_ptr.hpp>
 #include <vector>
-using namespace std;
 
+using namespace std;
+# define M_PI           3.14159265358979323846
 class Object
 {
 private:

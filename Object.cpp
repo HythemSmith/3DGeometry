@@ -8,8 +8,8 @@ vector<GLuint> Object::getIndices() {
 }
 
 void Object::setObject(string object) {
-	if (object == "cube") {
-		this->vertices = {
+    if (object == "cube") {
+        this->vertices = {
             // Vertices
             -0.5f, -0.2f,  0.5f,  0.0f, 1.f, 0.f,// 0: Bottom-left front
              0.5f, -0.2f,  0.5f,  0.0f, 1.f, 0.f,// 1: Bottom-right front
@@ -30,14 +30,14 @@ void Object::setObject(string object) {
             // Top face
             0, 3, 7, 6, 2, 1, 5 // GL_LINE_LOOP for top face
         };
-	}
+    }
     if (object == "paramid") {
         this->vertices = {
             // Vertices
             -0.5f, 0.0f,  0.5f,     0.f, 0.871f, 1.f,
             -0.5f, 0.0f, -0.5f,     0.118f, 0.812f, 0.216f,
             0.5f, 0.0f, -0.5f,     0.871f, 0.247f, 0.82f,
-            0.5f, 0.0f,  0.5f,     1.f, 0.f, 0.f,	
+            0.5f, 0.0f,  0.5f,     1.f, 0.f, 0.f,
             0.0f, 0.8f,  0.0f,     0.059f, 0.678f, 0.667f
         };
         this->indices = {
@@ -47,5 +47,92 @@ void Object::setObject(string object) {
            2, 3, 4,
            3, 0, 4
         };
+    }
+    if (object == "solid sphere") {
+        int sectors = 60;
+        int stacks = 60;
+        float radius = 1.f;
+        float sectorStep = 2 * M_PI / sectors;
+        float stackStep = M_PI / stacks;
+
+        for (int i = 0; i <= stacks; ++i) {
+            float stackAngle = M_PI / 2 - i * stackStep;
+            float xy = radius * cos(stackAngle);
+            float z = radius * sin(stackAngle);
+
+            for (int j = 0; j <= sectors; ++j) {
+                float sectorAngle = j * sectorStep;
+
+                float x = xy * cos(sectorAngle);
+                float y = xy * sin(sectorAngle);
+
+                vertices.push_back(x);
+                vertices.push_back(y);
+                vertices.push_back(z);
+                vertices.push_back(0.0f);
+                vertices.push_back(1.0f);
+                vertices.push_back(0.0f);
+
+         
+
+                // Texture coordinates (optional)
+                // vertices.push_back(static_cast<float>(j) / sectors);
+                // vertices.push_back(static_cast<float>(i) / stacks);
+            }
+        }
+
+        for (int i = 0; i < stacks; ++i) {
+            int k1 = i * (sectors + 1);
+            int k2 = k1 + sectors + 1;
+
+            for (int j = 0; j < sectors; ++j, ++k1, ++k2) {
+                if (i != 0) {
+                    indices.push_back(k1);
+                    indices.push_back(k2);
+                    indices.push_back(k1 + 1);
+                }
+
+                if (i != (stacks - 1)) {
+                    indices.push_back(k1 + 1);
+                    indices.push_back(k2);
+                    indices.push_back(k2 + 1);
+                }
+            }
+        }
+    }
+    if (object == "sphere") {
+        int segments = 30;
+        float radius = 1.f;
+        float sectorStep = 2 * M_PI / segments;
+        float stackStep = M_PI / segments;
+
+        for (int i = 0; i <= segments; ++i) {
+            float stackAngle = M_PI / 2 - i * stackStep;
+
+            for (int j = 0; j <= segments; ++j) {
+                float sectorAngle = j * sectorStep;
+
+                float x = radius * cos(stackAngle) * cos(sectorAngle);
+                float y = radius * cos(stackAngle) * sin(sectorAngle);
+                float z = radius * sin(stackAngle);
+
+                vertices.push_back(x);
+                vertices.push_back(y);
+                vertices.push_back(z);
+
+                if (i < segments && j < segments) {
+                    unsigned int currentIndex = i * (segments + 1) + j;
+                    unsigned int nextIndex = currentIndex + segments + 1;
+
+                    indices.push_back(currentIndex);
+                    indices.push_back(nextIndex);
+
+                    if (j == segments - 1) {
+                        indices.push_back(currentIndex);
+                        indices.push_back(currentIndex + 1);
+                    }
+                }
+            }
+        }
     }
 }
