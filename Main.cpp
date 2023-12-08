@@ -1,50 +1,29 @@
-
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include<glm/glm.hpp>
 #include<glm/gtc/matrix_transform.hpp>
 #include<glm/gtc/type_ptr.hpp>
+#include <vector>
 
 #include"shaderClass.h"
 #include"VAO.h"
 #include"VBO.h"
 #include"EBO.h"
 #include"Camera.h"
+#include "Object.h"
 
+using namespace std;
 
 
 const unsigned int width = 1000;
 const unsigned int height = 800;
 
-
-
-// Vertices coordinates
-GLfloat vertices[] =
-{ //     COORDINATES     /        COLORS      /   TexCoord  //
-	-0.5f, 0.0f,  0.5f,     0.f, 0.871f, 1.f,
-	-0.5f, 0.0f, -0.5f,     0.118f, 0.812f, 0.216f,
-	 0.5f, 0.0f, -0.5f,     0.871f, 0.247f, 0.82f,
-	 0.5f, 0.0f,  0.5f,     1.f, 0.f, 0.f,	
-	 0.0f, 0.8f,  0.0f,     0.059f, 0.678f, 0.667f
-};
-
-// Indices for vertices order
-GLuint indices[] =
-{
-	0, 1, 2, 3,
-	0, 1, 4,
-	1, 2, 4,
-	2, 3, 4,
-	3, 0, 4
-};
-
-
 int main()
 {
 	// Initialize GLFW
 	glfwInit();
-
+	
 	// Tell GLFW what version of OpenGL we are using 
 	// In this case we are using OpenGL 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -71,7 +50,10 @@ int main()
 	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
 	glViewport(0, 0, width, height);
 
-
+	Object object;
+	object.setObject("paramid");
+	vector<GLfloat> vertices = object.getVertices();
+	vector<GLuint> indices = object.getIndices();
 	// Generates Shader object using shaders default.vert and default.frag
 	Shader shaderProgram("default.vert", "default.frag");
 
@@ -84,7 +66,6 @@ int main()
 	VBO VBO1(vertices, sizeof(vertices));
 	// Generates Element Buffer Object and links it to indices
 	EBO EBO1(indices, sizeof(indices));
-
 	// Links VBO attributes such as coordinates and colors to VAO
 	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
 	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
@@ -130,7 +111,7 @@ int main()
 		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();
 		// Draw primitives, number of indices, datatype of indices, index of indices
-		glDrawElements(GL_LINE_LOOP, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_LINE_STRIP, indices.size(), GL_UNSIGNED_INT, 0);
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events

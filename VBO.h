@@ -2,6 +2,8 @@
 #define VBO_CLASS_H
 
 #include<glad/glad.h>
+#include<vector>
+using namespace std;
 
 class VBO
 {
@@ -9,7 +11,7 @@ public:
 	// Reference ID of the Vertex Buffer Object
 	GLuint ID;
 	// Constructor that generates a Vertex Buffer Object and links it to vertices
-	VBO(GLfloat* vertices, GLsizeiptr size);
+	VBO(vector<GLfloat> vertices, GLsizeiptr size);
 
 	// Binds the VBO
 	void Bind();
