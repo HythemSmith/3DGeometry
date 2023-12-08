@@ -8,17 +8,17 @@ vector<GLuint> Object::getIndices() {
 }
 
 void Object::setObject(string object) {
-	if (object == "cude") {
+	if (object == "cube") {
 		this->vertices = {
             // Vertices
-            -0.5f, -0.5f,  0.5f,  0.0f, 1.f, 0.f,// 0: Bottom-left front
-             0.5f, -0.5f,  0.5f,  0.0f, 1.f, 0.f,// 1: Bottom-right front
-             0.5f,  0.5f,  0.5f,  0.0f, 1.f, 0.f,// 2: Top-right front
-            -0.5f,  0.5f,  0.5f,  0.0f, 1.f, 0.f,// 3: Top-left front
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.f, 0.f,// 4: Bottom-left back
-             0.5f, -0.5f, -0.5f,  0.0f, 1.f, 0.f,// 5: Bottom-right back
-             0.5f,  0.5f, -0.5f,  0.0f, 1.f, 0.f,// 6: Top-right back
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.f, 0.f // 7: Top-left back
+            -0.5f, -0.2f,  0.5f,  0.0f, 1.f, 0.f,// 0: Bottom-left front
+             0.5f, -0.2f,  0.5f,  0.0f, 1.f, 0.f,// 1: Bottom-right front
+             0.5f,  0.8f,  0.5f,  0.0f, 1.f, 0.f,// 2: Top-right front
+            -0.5f,  0.8f,  0.5f,  0.0f, 1.f, 0.f,// 3: Top-left front
+            -0.5f, -0.2f, -0.5f,  0.0f, 1.f, 0.f,// 4: Bottom-left back
+             0.5f, -0.2f, -0.5f,  0.0f, 1.f, 0.f,// 5: Bottom-right back
+             0.5f,  0.8f, -0.5f,  0.0f, 1.f, 0.f,// 6: Top-right back
+            -0.5f,  0.8f, -0.5f,  0.0f, 1.f, 0.f // 7: Top-left back
         };
         this->indices = {
             // Front face

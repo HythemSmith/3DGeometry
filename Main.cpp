@@ -31,6 +31,7 @@ int main()
 	// Tell GLFW we are using the CORE profile
 	// So that means we only have the modern functions
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	// Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
 	GLFWwindow* window = glfwCreateWindow(width, height, "YoutubeOpenGL", NULL, NULL);
@@ -51,7 +52,7 @@ int main()
 	glViewport(0, 0, width, height);
 
 	Object object;
-	object.setObject("paramid");
+	object.setObject("cube");
 	vector<GLfloat> vertices = object.getVertices();
 	vector<GLuint> indices = object.getIndices();
 	// Generates Shader object using shaders default.vert and default.frag
