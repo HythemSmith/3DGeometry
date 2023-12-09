@@ -7,6 +7,10 @@
 #include<glm/gtc/type_ptr.hpp>
 #include <vector>
 
+#include"VAO.h"
+#include"VBO.h"
+#include"EBO.h"
+
 using namespace std;
 # define M_PI           3.14159265358979323846
 class Object
@@ -19,4 +23,5 @@ public:
 	void setObject(string object);
 	vector<GLfloat> getVertices();
 	vector<GLuint> getIndices();
+	void drawObject();
 };

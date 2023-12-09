@@ -8,6 +8,9 @@ vector<GLuint> Object::getIndices() {
 }
 
 void Object::setObject(string object) {
+    this->currentObject = object;
+    this->vertices.clear();
+    this->indices.clear();
     if (object == "cube") {
         this->vertices = {
             // Vertices
@@ -48,7 +51,7 @@ void Object::setObject(string object) {
            3, 0, 4
         };
     }
-    if (object == "solid sphere") {
+    if (object == "wireframe sphere") {
         int sectors = 60;
         int stacks = 60;
         float radius = 1.f;
@@ -66,18 +69,12 @@ void Object::setObject(string object) {
                 float x = xy * cos(sectorAngle);
                 float y = xy * sin(sectorAngle);
 
-                vertices.push_back(x);
-                vertices.push_back(y);
-                vertices.push_back(z);
-                vertices.push_back(0.0f);
-                vertices.push_back(1.0f);
-                vertices.push_back(0.0f);
-
-         
-
-                // Texture coordinates (optional)
-                // vertices.push_back(static_cast<float>(j) / sectors);
-                // vertices.push_back(static_cast<float>(i) / stacks);
+                this->vertices.push_back(x);
+                this->vertices.push_back(y);
+                this->vertices.push_back(z);
+                this->vertices.push_back(0.0f);
+                this->vertices.push_back(1.0f);
+                this->vertices.push_back(0.0f);
             }
         }
 
@@ -87,52 +84,29 @@ void Object::setObject(string object) {
 
             for (int j = 0; j < sectors; ++j, ++k1, ++k2) {
                 if (i != 0) {
-                    indices.push_back(k1);
-                    indices.push_back(k2);
-                    indices.push_back(k1 + 1);
+                    this->indices.push_back(k1);
+                    this->indices.push_back(k2);
+                    this->indices.push_back(k1 + 1);
                 }
 
                 if (i != (stacks - 1)) {
-                    indices.push_back(k1 + 1);
-                    indices.push_back(k2);
-                    indices.push_back(k2 + 1);
+                    this->indices.push_back(k1 + 1);
+                    this->indices.push_back(k2);
+                    this->indices.push_back(k2 + 1);
                 }
             }
         }
     }
-    if (object == "sphere") {
-        int segments = 30;
-        float radius = 1.f;
-        float sectorStep = 2 * M_PI / segments;
-        float stackStep = M_PI / segments;
+    
+}
 
-        for (int i = 0; i <= segments; ++i) {
-            float stackAngle = M_PI / 2 - i * stackStep;
-
-            for (int j = 0; j <= segments; ++j) {
-                float sectorAngle = j * sectorStep;
-
-                float x = radius * cos(stackAngle) * cos(sectorAngle);
-                float y = radius * cos(stackAngle) * sin(sectorAngle);
-                float z = radius * sin(stackAngle);
-
-                vertices.push_back(x);
-                vertices.push_back(y);
-                vertices.push_back(z);
-
-                if (i < segments && j < segments) {
-                    unsigned int currentIndex = i * (segments + 1) + j;
-                    unsigned int nextIndex = currentIndex + segments + 1;
-
-                    indices.push_back(currentIndex);
-                    indices.push_back(nextIndex);
-
-                    if (j == segments - 1) {
-                        indices.push_back(currentIndex);
-                        indices.push_back(currentIndex + 1);
-                    }
-                }
-            }
-        }
+void Object::drawObject() {
+    if (this->currentObject == "cube" || this->currentObject == "paramid") {
+        glDrawElements(GL_LINE_STRIP, this->indices.size(), GL_UNSIGNED_INT, 0);
+        return;
+    }
+    if (this->currentObject == "wireframe sphere") {
+        glDrawElements(GL_LINES, this->indices.size(), GL_UNSIGNED_INT, 0);
+        return;
     }
 }

@@ -18,6 +18,15 @@ using namespace std;
 
 const unsigned int width = 1000;
 const unsigned int height = 800;
+Object object;
+
+void UpdateObject(VBO& vbo, EBO& ebo) {
+	vbo.Bind();
+	ebo.Bind();
+
+	vbo.UpdateBufferData(object.getVertices());
+	ebo.UpdateBufferData(object.getIndices());
+}
 
 int main()
 {
@@ -26,8 +35,8 @@ int main()
 	
 	// Tell GLFW what version of OpenGL we are using 
 	// In this case we are using OpenGL 3.3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	// Tell GLFW we are using the CORE profile
 	// So that means we only have the modern functions
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -35,7 +44,7 @@ int main()
 	glfwWindowHint(GLFW_DEPTH_BITS, 24); // Request a 24-bit depth buffer
 
 	// Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
-	GLFWwindow* window = glfwCreateWindow(width, height, "YoutubeOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, "OpenGL", NULL, NULL);
 	// Error check if the window fails to create
 	if (window == NULL)
 	{
@@ -52,10 +61,7 @@ int main()
 	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
 	glViewport(0, 0, width, height);
 
-	Object object;
-	object.setObject("solid sphere");
-	vector<GLfloat> vertices = object.getVertices();
-	vector<GLuint> indices = object.getIndices();
+	object.setObject("cube");
 	// Generates Shader object using shaders default.vert and default.frag
 	Shader shaderProgram("default.vert", "default.frag");
 
@@ -65,29 +71,16 @@ int main()
 	VAO1.Bind();
 
 	// Generates Vertex Buffer Object and links it to vertices
-	VBO VBO1(vertices, sizeof(vertices));
+	VBO VBO1(object.getVertices());
 	// Generates Element Buffer Object and links it to indices
-	EBO EBO1(indices, sizeof(indices));
+	EBO EBO1(object.getIndices());
 	// Links VBO attributes such as coordinates and colors to VAO
 	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
 	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	// Unbind all to prevent accidentally modifying them
 	VAO1.Unbind();
-	VBO1.Unbind();
-	EBO1.Unbind();
-
-
-
-	/*
-	* I'm doing this relative path thing in order to centralize all the resources into one folder and not
-	* duplicate them between tutorial folders. You can just copy paste the resources from the 'Resources'
-	* folder and then give a relative path from this folder to whatever resource you want to get to.
-	* Also note that this requires C++17, so go to Project Properties, C/C++, Language, and select C++17
-	*/
-	
-
-
-
+	//VBO1.Unbind();
+	//EBO1.Unbind();
 
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
@@ -98,13 +91,26 @@ int main()
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
+
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		// Clean the back buffer and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// Tell OpenGL which Shader Program we want to use
 		shaderProgram.Activate();
-
+		// Choose objects
+		if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+			object.setObject("cube");
+			UpdateObject(VBO1, EBO1);
+		}
+		if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+			object.setObject("paramid");
+			UpdateObject(VBO1, EBO1);
+		}
+		if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
+			object.setObject("wireframe sphere");
+			UpdateObject(VBO1, EBO1);
+		}
 		// Handles camera inputs
 		camera.Inputs(window);
 		// Updates and exports the camera matrix to the Vertex Shader
@@ -112,8 +118,9 @@ int main()
 
 		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();
+		
 		// Draw primitives, number of indices, datatype of indices, index of indices
-		glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
+		object.drawObject();
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
