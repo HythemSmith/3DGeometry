@@ -26,37 +26,27 @@ bool checkVertexClick(double xpos, double ypos, const glm::mat4& camMatrix, cons
 	// Convert screen coordinates to clip space
 	float clipX = (2.0f * xpos) / width - 1.0f;
 	float clipY = 1.0f - (2.0f * ypos) / height;
-	glm::vec4 clipCoords(clipX, clipY, -1.0f, 1.0f);
+	glm::vec2 clipCoords(clipX, clipY);
 
-	// Inverse transformation from clip space to eye space
-	glm::mat4 invCamMatrix = glm::inverse(camMatrix);
-	glm::vec4 eyeCoords = invCamMatrix * clipCoords;
-	eyeCoords.z = -1.0f; // Set depth to near plane
-
-	// Ray direction in world space
-	glm::vec4 rayWorld = glm::normalize(eyeCoords);
-	rayWorld.w = 0.0f;
-	//cout << rayWorld.x << " " << rayWorld.y << " " << rayWorld.z<< endl;
-	// Check for intersection with object's vertices
+	cout << "ClickCoord: " << clipCoords.x << " " << clipCoords.y << endl;
 	for (size_t i = 0; i < object.vertices.size(); i+=6) {
 		glm::vec4 vertexPos = glm::vec4(object.vertices[i],object.vertices[i + 1], 
 										object.vertices[i + 2], 1.0f);
 		glm::vec4 vertexWorld = camMatrix * vertexPos;
-		//cout << vertexWorld.x << " " << vertexWorld.y << " " << " " << vertexWorld.z << endl;
-		// Perform intersection test (e.g., distance comparison, bounding box check, etc.)
-		// Here, you can check if the ray intersects with the vertex position
-		// For instance, compute the distance between ray and vertex positions
-		float distance = glm::distance(rayWorld, vertexWorld);
+		glm::vec4 vertexNDC = vertexWorld / vertexWorld.w;
+		cout << "Vertex: " << vertexNDC.x << " " << vertexNDC.y << " " << vertexNDC.z << endl;
+		// Perform a simple distance check with clicked point and each vertex
+		float distance = glm::distance(glm::vec2(clipCoords), glm::vec2(vertexNDC));
 
-		// Adjust threshold for intersection based on your needs
-		float intersectionThreshold = 0.1f;
+		// Set a threshold for intersection (adjust as needed)
+		float intersectionThreshold = 0.005f;
 
 		if (distance < intersectionThreshold) {
-			std::cout << "Clicked on vertex " << i << std::endl;
+			std::cout << "Clicked on vertex " << std::endl;
 			return true; // Hit found
 		}
 	}
-	cout << "failed" << endl;
+	std::cout << "No hit" << std::endl << endl;
 	return false; // No hit found
 }
 
@@ -64,12 +54,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		glm::mat4 camMatrix = camera.camMatrix; // Example function to get the combined matrix
 		glm::vec3 cameraPos = camera.Position; // Get camera position
-		for (int i = 0; i < 4; ++i) {
-			for (int j = 0; j < 4; ++j) {
-				std::cout << camMatrix[i][j] << " ";
-			}
-			std::cout << std::endl;
-		}
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
