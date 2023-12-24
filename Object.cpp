@@ -37,10 +37,15 @@ void Object::setObject(string object) {
     if (object == "paramid") {
         this->vertices = {
             // Vertices
+            // Front left
             -0.5f, 0.0f,  0.5f,     0.f, 0.871f, 1.f,
+            // Back left
             -0.5f, 0.0f, -0.5f,     0.118f, 0.812f, 0.216f,
+            // Back right
             0.5f, 0.0f, -0.5f,     0.871f, 0.247f, 0.82f,
+            // Front right
             0.5f, 0.0f,  0.5f,     1.f, 0.f, 0.f,
+            // Apex
             0.0f, 0.8f,  0.0f,     0.059f, 0.678f, 0.667f
         };
         this->indices = {
@@ -109,4 +114,26 @@ void Object::drawObject() {
         glDrawElements(GL_LINES, this->indices.size(), GL_UNSIGNED_INT, 0);
         return;
     }
+}
+void Object::setObjectBasedOnInput(GLFWwindow* window, VBO& vbo, EBO& ebo) {
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+        setObject("cube");
+        UpdateObject(vbo, ebo);
+    }
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+        setObject("paramid");
+        UpdateObject(vbo, ebo);
+    }
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
+        setObject("wireframe sphere");
+        UpdateObject(vbo, ebo);
+    }
+    // ... Other object selection conditions ...
+}
+void Object::UpdateObject(VBO& vbo, EBO& ebo) {
+    vbo.Bind();
+    ebo.Bind();
+
+    vbo.UpdateBufferData(getVertices());
+    ebo.UpdateBufferData(getIndices());
 }

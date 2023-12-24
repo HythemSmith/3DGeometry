@@ -15,13 +15,14 @@ using namespace std;
 # define M_PI           3.14159265358979323846
 class Object
 {
-private:
+public:
 	string currentObject;
 	vector<GLfloat> vertices;
 	vector<GLuint> indices;
-public:
 	void setObject(string object);
 	vector<GLfloat> getVertices();
 	vector<GLuint> getIndices();
 	void drawObject();
+	void setObjectBasedOnInput(GLFWwindow* window, VBO& vbo, EBO& ebo);
+	void UpdateObject(VBO& vbo, EBO& ebo);
 };

@@ -19,13 +19,62 @@ using namespace std;
 const unsigned int width = 1000;
 const unsigned int height = 800;
 Object object;
+// Creates camera object
+Camera camera(width, height, glm::vec3(0.0f, 0.3f, 2.0f));
 
-void UpdateObject(VBO& vbo, EBO& ebo) {
-	vbo.Bind();
-	ebo.Bind();
+bool checkVertexClick(double xpos, double ypos, const glm::mat4& camMatrix, const glm::vec3& cameraPos) {
+	// Convert screen coordinates to clip space
+	float clipX = (2.0f * xpos) / width - 1.0f;
+	float clipY = 1.0f - (2.0f * ypos) / height;
+	glm::vec4 clipCoords(clipX, clipY, -1.0f, 1.0f);
 
-	vbo.UpdateBufferData(object.getVertices());
-	ebo.UpdateBufferData(object.getIndices());
+	// Inverse transformation from clip space to eye space
+	glm::mat4 invCamMatrix = glm::inverse(camMatrix);
+	glm::vec4 eyeCoords = invCamMatrix * clipCoords;
+	eyeCoords.z = -1.0f; // Set depth to near plane
+
+	// Ray direction in world space
+	glm::vec4 rayWorld = glm::normalize(eyeCoords);
+	rayWorld.w = 0.0f;
+	//cout << rayWorld.x << " " << rayWorld.y << " " << rayWorld.z<< endl;
+	// Check for intersection with object's vertices
+	for (size_t i = 0; i < object.vertices.size(); i+=6) {
+		glm::vec4 vertexPos = glm::vec4(object.vertices[i],object.vertices[i + 1], 
+										object.vertices[i + 2], 1.0f);
+		glm::vec4 vertexWorld = camMatrix * vertexPos;
+		//cout << vertexWorld.x << " " << vertexWorld.y << " " << " " << vertexWorld.z << endl;
+		// Perform intersection test (e.g., distance comparison, bounding box check, etc.)
+		// Here, you can check if the ray intersects with the vertex position
+		// For instance, compute the distance between ray and vertex positions
+		float distance = glm::distance(rayWorld, vertexWorld);
+
+		// Adjust threshold for intersection based on your needs
+		float intersectionThreshold = 0.1f;
+
+		if (distance < intersectionThreshold) {
+			std::cout << "Clicked on vertex " << i << std::endl;
+			return true; // Hit found
+		}
+	}
+	cout << "failed" << endl;
+	return false; // No hit found
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		glm::mat4 camMatrix = camera.camMatrix; // Example function to get the combined matrix
+		glm::vec3 cameraPos = camera.Position; // Get camera position
+		for (int i = 0; i < 4; ++i) {
+			for (int j = 0; j < 4; ++j) {
+				std::cout << camMatrix[i][j] << " ";
+			}
+			std::cout << std::endl;
+		}
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+
+		checkVertexClick(xpos, ypos, camMatrix, cameraPos);
+	}
 }
 
 int main()
@@ -60,7 +109,7 @@ int main()
 	// Specify the viewport of OpenGL in the Window
 	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
 	glViewport(0, 0, width, height);
-
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	object.setObject("cube");
 	// Generates Shader object using shaders default.vert and default.frag
 	Shader shaderProgram("default.vert", "default.frag");
@@ -85,9 +134,6 @@ int main()
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
 
-	// Creates camera object
-	Camera camera(width, height, glm::vec3(0.0f, 0.3f, 2.0f));
-
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -99,23 +145,22 @@ int main()
 		// Tell OpenGL which Shader Program we want to use
 		shaderProgram.Activate();
 		// Choose objects
-		if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
-			object.setObject("cube");
-			UpdateObject(VBO1, EBO1);
-		}
-		if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
-			object.setObject("paramid");
-			UpdateObject(VBO1, EBO1);
-		}
-		if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
-			object.setObject("wireframe sphere");
-			UpdateObject(VBO1, EBO1);
-		}
+		object.setObjectBasedOnInput(window, VBO1, EBO1);
 		// Handles camera inputs
 		camera.Inputs(window);
 		// Updates and exports the camera matrix to the Vertex Shader
 		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
+		// --------------------------Check code here---------------------------------------//
 
+
+
+
+
+
+
+
+
+		// --------------------------Check code here---------------------------------------//
 		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();
 		
