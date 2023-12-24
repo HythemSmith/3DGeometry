@@ -28,21 +28,19 @@ bool checkVertexClick(double xpos, double ypos, const glm::mat4& camMatrix, cons
 	float clipY = 1.0f - (2.0f * ypos) / height;
 	glm::vec2 clipCoords(clipX, clipY);
 
-	cout << "ClickCoord: " << clipCoords.x << " " << clipCoords.y << endl;
-	for (size_t i = 0; i < object.vertices.size(); i+=6) {
+	for (size_t i = 0; i < object.vertices.size(); i+=7) {
 		glm::vec4 vertexPos = glm::vec4(object.vertices[i],object.vertices[i + 1], 
 										object.vertices[i + 2], 1.0f);
 		glm::vec4 vertexWorld = camMatrix * vertexPos;
 		glm::vec4 vertexNDC = vertexWorld / vertexWorld.w;
-		cout << "Vertex: " << vertexNDC.x << " " << vertexNDC.y << " " << vertexNDC.z << endl;
 		// Perform a simple distance check with clicked point and each vertex
 		float distance = glm::distance(glm::vec2(clipCoords), glm::vec2(vertexNDC));
 
 		// Set a threshold for intersection (adjust as needed)
-		float intersectionThreshold = 0.005f;
+		float intersectionThreshold = 0.1f;
 
 		if (distance < intersectionThreshold) {
-			std::cout << "Clicked on vertex " << std::endl;
+			object.addVertexToFormPlane(i);
 			return true; // Hit found
 		}
 	}
@@ -56,7 +54,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		glm::vec3 cameraPos = camera.Position; // Get camera position
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
-
 		checkVertexClick(xpos, ypos, camMatrix, cameraPos);
 	}
 }
@@ -99,25 +96,34 @@ int main()
 	Shader shaderProgram("default.vert", "default.frag");
 
 
-	// Generates Vertex Array Object and binds it
+	// Generates Vertex Array Objects and binds them separately for different objects
 	VAO VAO1;
 	VAO1.Bind();
 
-	// Generates Vertex Buffer Object and links it to vertices
+	// Generate and link VBO and EBO for the first object
 	VBO VBO1(object.getVertices());
-	// Generates Element Buffer Object and links it to indices
 	EBO EBO1(object.getIndices());
-	// Links VBO attributes such as coordinates and colors to VAO
-	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
-	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	// Unbind all to prevent accidentally modifying them
-	VAO1.Unbind();
-	//VBO1.Unbind();
-	//EBO1.Unbind();
+	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 7 * sizeof(float), (void*)0);
+	VAO1.LinkAttrib(VBO1, 1, 4, GL_FLOAT, 7 * sizeof(float), (void*)(3 * sizeof(float)));
 
+	// Unbind VAO1 to prevent accidental modification
+	VAO1.Unbind();
+
+	// Create another VAO for the second object
+	VAO VAO2;
+	VAO2.Bind();
+
+	// Generate and link VBO for the second object
+	VBO VBO2(object.getVerticesForPlane());
+	VAO2.LinkAttrib(VBO2, 0, 3, GL_FLOAT, 7 * sizeof(float), (void*)0);
+	VAO2.LinkAttrib(VBO2, 1, 4, GL_FLOAT, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+
+	// Unbind VAO2 to prevent accidental modification
+	VAO2.Unbind();
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
-
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -134,22 +140,18 @@ int main()
 		camera.Inputs(window);
 		// Updates and exports the camera matrix to the Vertex Shader
 		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
-		// --------------------------Check code here---------------------------------------//
-
-
-
-
-
-
-
-
-
-		// --------------------------Check code here---------------------------------------//
 		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();
-		
-		// Draw primitives, number of indices, datatype of indices, index of indices
 		object.drawObject();
+		VAO1.Unbind();
+		// Bind the VAO so OpenGL knows to use it
+		VAO2.Bind();
+		if (object.CountVertices == 3) {
+			VBO2.Bind();
+			VBO2.UpdateBufferData(object.getVerticesForPlane());
+			object.drawPlane();
+		}
+		VAO2.Unbind();
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
@@ -162,6 +164,8 @@ int main()
 	VAO1.Delete();
 	VBO1.Delete();
 	EBO1.Delete();
+	VAO2.Delete();
+	VBO2.Delete();
 	shaderProgram.Delete();
 	// Delete window before ending the program
 	glfwDestroyWindow(window);

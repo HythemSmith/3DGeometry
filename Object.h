@@ -16,13 +16,22 @@ using namespace std;
 class Object
 {
 public:
+	int CountVertices = 0;
 	string currentObject;
 	vector<GLfloat> vertices;
 	vector<GLuint> indices;
+	vector<GLfloat> verticesForPlane;
+	vector<int> indexCheck; //store the index of vectices use to draw the plane
 	void setObject(string object);
 	vector<GLfloat> getVertices();
+	vector<GLfloat> getVerticesForPlane() {
+		return verticesForPlane;
+	}
 	vector<GLuint> getIndices();
 	void drawObject();
+	void drawPlane();
 	void setObjectBasedOnInput(GLFWwindow* window, VBO& vbo, EBO& ebo);
 	void UpdateObject(VBO& vbo, EBO& ebo);
+	void addVertexToFormPlane(int index);
+
 };
