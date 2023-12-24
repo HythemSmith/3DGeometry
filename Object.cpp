@@ -12,6 +12,7 @@ void Object::setObject(string object) {
     this->vertices.clear();
     this->indices.clear();
     this->verticesForPlane.clear();
+    this->indexCheck.clear();
     CountVertices = 0;
     if (object == "cube") {
         this->vertices = {
